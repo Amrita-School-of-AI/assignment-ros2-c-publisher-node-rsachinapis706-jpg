@@ -27,13 +27,27 @@ public:
     PublisherNode()
         : Node("publisher_node"), count_(0)
     {
-        // TODO: Create the publisher here
+         publisher_ = this->create_publisher<std_msgs::msg::String>("/counter", 10);
+        
+         timer_ = this->create_wall_timer(
+           500ms,
+           std::bind(&PublisherNode::timer_callback, this)
+        );
 
-        // TODO: Initialize the timer here
     }
 
 private:
-    // TODO: Define the timer_callback function here
+    void timer_callback()
+{
+    std_msgs::msg::String message;
+    message.data = "Count: " + std::to_string(count_);
+
+    RCLCPP_INFO(this->get_logger(), "Publishing: '%s'", message.data.c_str());
+
+    publisher_->publish(message);
+    count_++;
+}
+
 
     rclcpp::TimerBase::SharedPtr timer_;
     rclcpp::Publisher<std_msgs::msg::String>::SharedPtr publisher_;
